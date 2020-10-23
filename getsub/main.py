@@ -31,6 +31,7 @@ class GetSubtitles(object):
         sub_num,
         downloader,
         sub_path,
+        xxxx
     ):
         self.arg_name = name
         self.both = both
@@ -59,6 +60,7 @@ class GetSubtitles(object):
         self.failed_list = []  # [{'name', 'path', 'error', 'trace_back'}
         self.sub_identifier = "" if not self.plex else ".zh"
         self.sub_store_path = sub_path.replace('"', "")
+        self.xxxx = xxxx
         if not path.isdir(self.sub_store_path):
             if self.sub_store_path:
                 print("store path is invalid: " + self.sub_store_path)
@@ -151,6 +153,16 @@ class GetSubtitles(object):
         if datatype not in ARCHIVE_TYPES:
             error = "unsupported file type " + datatype
             return error, []
+
+        if self.xxxx:
+            # save without further action
+            archive_name = video.name + video.sub_identifier + datatype
+            extract_path = path.join(video.sub_store_path, archive_name)
+            with open(extract_path, "wb") as f:
+                f.write(archive_data)
+
+            extract_files = [[archive_name, datatype]]
+            return "", extract_files
 
         sub_lists_dict = get_file_list(archive_data, datatype)
 
@@ -390,6 +402,12 @@ def main():
         help="show subtitles in the compacted file and choose one to download",
     )
     arg_parser.add_argument(
+        "-x",
+        "--xxxx",
+        action="store_true",
+        help="download without further action",
+    )
+    arg_parser.add_argument(
         "-o", "--over", action="store_true", help="replace the subtitle already exists"
     )
     arg_parser.add_argument(
@@ -440,6 +458,7 @@ def main():
         sub_num=args.number,
         downloader=args.downloader,
         sub_path=args.directory,
+        xxxx=args.xxxx
     ).start()
 
 
